@@ -2,4 +2,4 @@
 * text=auto
 
 #mark Rmarkdown files as R
-*.md linguist-language=R
+*.Rmd linguist-language=R
