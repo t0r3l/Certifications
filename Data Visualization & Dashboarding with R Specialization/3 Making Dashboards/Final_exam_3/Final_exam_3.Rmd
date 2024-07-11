@@ -1,0 +1,162 @@
+---
+title: "Peer Review Three"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(shiny)
+
+dat<-read_csv(url("https://www.dropbox.com/s/4ebgnkdhhxo5rac/cel_volden_wiseman%20_coursera.csv?raw=1"))
+
+dat$Party<-recode(dat$dem,`1`="Democrat",`0`="Republican")
+
+#Page 3, lines 115 & 119
+states = dat %>% distinct(st_name)
+
+
+
+#######HINT: for Chart D, you'll need to set the height of the renderPlot, using the height argument. Try a value of 750.
+
+#####some data management functions are already included. You need to add the visualization functions.
+
+```
+
+
+Page 1 
+======
+
+### Chart A
+
+```{r}
+dat %>% 
+  drop_na() %>% 
+  filter(year>1979) %>% 
+  group_by(year,Party) %>%
+  summarise(passed=sum(all_pass)) %>%
+  ggplot(aes(x = year, y = passed, fill = Party)) +
+  geom_area() +
+  scale_fill_manual(values = c("Democrat" = "blue", "Republican" = "red")) +
+  theme_minimal() +
+  ggtitle("Number of Bills Passed since 1980") +
+  xlab("Year") +
+  ylab("All Bills Passed") 
+```
+
+
+
+Page 2{data-orientation=rows}
+======
+
+
+### Chart B
+
+```{r}
+
+ggplotly(
+dat%>%
+  drop_na()%>%
+  filter(congress==110) %>%
+  ggplot(aes(x = votepct, y = all_pass, color = Party, fill = Party)) +
+  geom_point() +
+  ###df stands for degree of freedom, spline must be investigate
+  geom_smooth(method = "lm", formula = y ~ splines::bs(x, df = 0)) +
+  scale_color_manual(values = c("Democrat" = "blue", "Republican" = "red")) +
+  scale_fill_manual(values = c("Democrat" = "blue", "Republican" = "red")) + 
+  ggtitle("Passage and Vote Pct., 11th Congress") +
+  xlab("Vote Pct") +
+  ylab("All Pass") +
+  theme(
+  plot.title = element_text(size = 20), 
+  axis.title.x = element_text(size = 15),
+  axis.title.y = element_text(size = 15)
+)
+)
+
+```
+
+
+
+
+### Chart C
+
+```{r}
+ggplotly(
+dat%>%
+  drop_na()%>%
+  filter(congress==110) %>%
+  ggplot(aes(x = dwnom1, y = all_pass, color = Party, fill = Party)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  scale_color_manual(values = c("Democrat" = "blue", "Republican" = "red")) +
+  scale_fill_manual(values = c("Democrat" = "blue", "Republican" = "red")) +
+  ggtitle("Passage Ideology, 11th Congress") +
+  xlab("DW Nominate.") +
+  ylab("All Pass") +
+  theme(
+  plot.title = element_text(size = 20), 
+  axis.title.x = element_text(size = 15),
+  axis.title.y = element_text(size = 15)
+  )
+)
+```
+
+
+Page 3{data-orientation=rows}
+=============================
+
+
+
+
+Chart D{.sidebar}
+----------------------
+
+
+```{r}
+selectInput(
+  inputId = "select_state",
+  label = "State",
+  #see line 21
+  choices = states,
+  multiple = TRUE,
+  #option doesn't read tibbles
+  selected = states$st_name
+  )
+
+```
+
+
+
+Row
+------------------------
+
+###
+
+```{r}
+selected_dat = reactive(
+  filter(dat, st_name %in% input$select_state)
+)
+
+renderPlot({
+selected_dat() %>%
+  group_by(st_name) %>%
+  filter(congress==110) %>%
+  summarise(passed=sum(all_pass)) %>%
+  ggplot(aes(x = passed,y = st_name)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Total Bills Passed by State Delegations, 110th Congress") +
+    xlab('Total Bills Passed Per State') +
+    ylab('State name') + 
+    theme(
+  plot.title = element_text(size = 20), 
+  axis.title.x = element_text(size = 15),
+  axis.title.y = element_text(size = 15)
+)
+})
+```

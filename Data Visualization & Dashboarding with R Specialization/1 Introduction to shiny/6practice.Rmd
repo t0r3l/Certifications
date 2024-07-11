@@ -1,0 +1,37 @@
+---
+title: "Practice"
+author: "t0r3l"
+date: "2024-07-05"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+dat = read_csv("groups.csv")
+```
+
+This is my report:
+
+Notice that here there is no need for framing ui elements neither assign them to
+ui and server variables.
+
+```{r eruptions, echo=FALSE}
+inputPanel({
+  checkboxGroupInput(
+    inputId= "checked_groups",
+    label="Which groups do you want to display?",
+    choices=c("a", "b", "c"),
+    selected=c("a", "b", "c", "d")
+  )
+})
+
+renderPlot({
+  plot_data = filter(dat, Group %in% input$checked_groups)
+  ggplot(data = plot_data,
+         aes(x= varX, y = varY, color = Group)) + geom_point()
+})
+```
+
