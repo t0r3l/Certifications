@@ -3,3 +3,6 @@
 
 #mark Rmarkdown files as R
 *.Rmd linguist-language=R
+
+# Ignore documentation files
+docs/** linguist-documentation
