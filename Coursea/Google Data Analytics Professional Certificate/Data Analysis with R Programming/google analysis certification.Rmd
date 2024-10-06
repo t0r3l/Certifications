@@ -1,0 +1,1774 @@
+---
+title: "Data Analysis with R Programming"
+author: "t0r3l"
+date: "2024-04-18"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#This is n R Markdown for more informations about this text editor go to:#
+
+[Introduction to R Markdown](https://rushinglab.github.io/WILD6900/articles/rmarkdown_intro.html)
+
+[R Markdown](https://rmarkdown.rstudio.com/)
+
+[cheat sheet](https://rmarkdown.rstudio.com/lesson-15.html)
+
+ctrl + alt +i to add a chunk
+
+italic words are defined between 1 asterics to each side of it
+
+bold words are defined between 2 asterics to each side of it
+
+Bullet points are added with 1 asterics on the left
+
+Plots can be embed the same way as links which bthe way can also be added betweeen '<' and '>' signs
+
+
+#Module 2
+
+
+##0 Get helped in R
+
+Posit (RStudio)
+
+: The best place to find help with R is in R itself! You can input ‘?’ or the help() command to search in R. You can also open the Help pane to find more R resources. 
+
+You can also write ?funtion_name to get helped.
+
+Posit Blog:
+ Posit's blog is a great place to find information about RStudio, including company news.  You can read the most recent featured posts
+
+ or use the search bar and the list of categories on the left side of the page to explore specific topics you might find interesting or to search for a specific post. 
+
+Stack Overflow:
+
+ The Stack Overflow blog posts opinions and advice from other coders. This is a great place to stay in touch with conversations happening in the community. 
+
+R-Bloggers:
+
+ The R-Bloggers blog has useful tutorials and news articles posted by other R users in the community. 
+
+R-Bloggers' tutorials for learning R: 
+This blog post from R-Bloggers compiles some basic R tutorials and also links to more advanced guides. 
+
+When exporting an RMardown no chunk must contain  any error!
+
+##I Vectors and lists
+
+###A.Vectors
+
+A vector is a list of objects of the same type
+
+
+```{r}
+integer = c(5L, 9L, 7L)
+
+double = c(2.5, 7, 3.4)
+
+character = c('a', 'b', 'c')
+
+logical = c(TRUE, FALSE)
+```
+
+
+
+```{r}
+#determining properties of vectors
+typeof(integer)
+
+is.logical(logical)
+
+#length
+length(integer)
+```
+
+
+###B. Lists
+
+A list allows more flexibility than a vector
+
+
+```{r}
+anytype = list('a', 7.2, list(3L, TRUE))
+logicallist =list(TRUE, TRUE)
+
+#to summarize it
+str(anytype)
+
+#Length
+length(anytype)
+
+#Doesn't work
+is.logical(logicallist)
+
+#Values can be named then accessed
+namedlist = list('a' = 1, 'b' = 2, 'c' = 3)
+namedlist['b']
+```
+
+################################################
+
+##II Dates
+
+https://rawgit.com/rstudio/cheatsheets/master/lubridate.pdf
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+today()
+now()
+```
+
+
+CEST stands for Central European Summer Time
+
+
+To convert a string in a date thanks to lubridate package
+use the y for year, m for mounth and d for days letters and
+concatenate them in the order the values are given in the string
+to convert it as a date object with a function
+
+
+```{r}
+tomorrow = dmy("18-04-2024")
+after_tomorrow = mdy("April 19th, 2024")
+
+```
+
+
+For numbers ending in 1 (except 11), you add "st" (e.g., 1st, 21st).
+For numbers ending in 2 (except 12), you add "nd" (e.g., 2nd, 22nd).
+For numbers ending in 3 (except 13), you add "rd" (e.g., 3rd, 23rd).
+For all other numbers, you add "th" (e.g., 4th, 11th, 15th, 30th)
+
+
+However whatever is the order in which it has been input the output
+will always be "yyyy-mm-dd"
+
+
+for a full date same principle with h, m and s letters after an undescore
+
+
+```{r}
+fulldate = ymd_hms('2024-05-02-15-15-15')
+```
+
+
+ymd are mandatory to convert a date, however for hours,
+minutes and seconds the most precise measures aren't as
+long as there is a less precise measure before
+
+
+```{r}
+yearAndSecond = ymd_h('2050-02-05-15')
+```
+
+
+a date-time object can be converted in a date object as follow
+
+```{r}
+as_date(now())
+```
+
+
+A vector as follow
+
+```{r}
+date1 = mdy(c('February 12th, 1809', 'March 14th, 1879', 
+          'November 7th, 1867', 'June 23rd, 1912'))
+
+date2 <- mdy(c('April 19, 1882', 'April 18, 1955', 
+           'July 4th, 1934', 'June 7, 1954'))
+```
+
+
+Differences between dates can be computed this way
+years can be replaced by months or even days
+
+```{r}
+interval(date1, date2) %/% years(1)
+```
+
+
+
+Lets imagine that I want to chack out the interval between a past date and 20 
+years from now
+
+Note that not precising the measure (eg: %/%years(1)) will provide a date-time 
+object in UTC (CUT Coordinated Universal Time)
+
+```{r}
+interval(date1, now() + dyears(20)) %/% years(1)
+```
+
+
+More informations are available in those ['tutorials'](https://www.youtube.com/watch?v=GtSW4MQcnzE&list=PLu6UwBFCnlEel8EaYcRShzIKmh4HcIZZi&index=12&ab_channel=StatisticsGlobe)
+
+
+##################################################
+
+
+
+##III Other data structures
+
+###A. Data frames
+
+Data frames can include many different types of data, including numeric,
+logical, or character.
+
+Data frames can have only one element in each cell.
+
+Each column should be named.
+
+Each column should consist of elements of the same data type.
+
+
+```{r}
+df = data.frame(first_name = c("Nina", 'Tom'), age = c(18L, 25L))
+View(df)
+
+#Extract inner index then col index (starts at 1)
+df[2,1]
+
+```
+
+
+##B. Files
+
+```{r}
+#Get working directory
+getwd()
+
+
+#Change working directory
+
+# Set the working directory to a specific path
+setwd("/path/to/your/directory")
+
+# You can also use a relative path
+setwd("relative/path/to/your/directory")
+
+setwd("R")
+
+```
+
+
+Create a file
+
+#file.create("new_text_file.txt") 
+#file.create("new_word_file.docx") 
+#file.create("new_csv_file.csv")
+
+Delete a file 
+
+#unlink("new_text_file.txt")
+
+
+###C. Matrices
+
+A matrix is a two-dimensional collection of data
+elements. This means it has both rows and columns.
+By contrast, a vector is a one-dimensional sequence
+of data elements. But like vectors, matrices can only
+contain a single data type. For example, you can’t
+have both logical and numeric in a matrix.
+
+
+```{r}
+a = matrix(c(3:8), nrow = 2)
+
+b = matrix(c(3:8), ncol = 2)
+
+
+#Similar to data frames, you can extract an element 
+#from a matrix with the extract operator, [].
+
+a
+b
+a[1,2]
+b[1,2]
+```
+
+
+#############################################
+
+
+##IV Logical operators and conditional statements
+
+###A. Operators and calculation
+
+
+In R logical operators are used; OR: |, AND: &, NOT: ! (negates the logical
+value it applies to eg !TRUE => FALSE)
+They return Boolean TRUE or FALSE.
+0 is considered as a FALSE value and other numbers as TRUE
+
+###B. Conditional statements
+
+
+if(), else (), else if()
+
+```{r}
+x = -1
+
+if (x>5) {
+  print('x is greater than 5')
+} else if (x<0) {
+  print('x is a negative number')
+} else {
+  print('x is between 0 and 5')
+}
+
+```
+
+
+##V Data visualization:
+
+
+###A. Using `R packages`
+
+```{r}
+install.packages("tidyverse")
+```
+
+
+Once a package is installed, you can load it by running the `library()` function with the package name inside the parentheses, like this:
+
+
+```{r}
+library(tidyverse)
+```
+
+###B. Viewing data
+
+One common function you can use to preview the data is the `head()` function, which displays the columns and the first several rows of data.
+```{r}
+head(diamonds)
+```
+
+tail dies the same than 'head()' however it displays the end of the data set.
+
+
+```{r}
+tail(diamonds)
+```
+
+
+
+In addition to `head()` there are a number of other useful functions you can use to summarize or preview the data. For example, the `str()` and `glimpse()` functions will both return summaries of each column in your data arranged horizontally. 
+
+```{r}
+str(diamonds)
+```
+
+```{r}
+glimpse(diamonds)
+```
+
+
+Another simple function that you may use regularly is the `colnames()` function. It returns a list of column names from your dataset.
+
+
+```{r}
+colnames(diamonds)
+```
+
+After running the code chunk, you may have noticed a number in brackets. This number helps you count the number of columns in your dataset. If you have data with lots of columns and `colnames()` prints the results on multiple lines, each line will have a number in brackets at the start of the line indicating what number column that is! So, for example, "carat" is the first column in the `diamonds` dataset. On the second line, there is the number seven in brackets; "price" is the seventh column. 
+
+
+###C. Cleaning data
+
+you might need to rename the columns, or variables, in your data. There is a function for that: `rename().` 
+
+```{r}
+rename(diamonds, carat_new = carat)
+rename(diamonds, carat_new = carat, cut_new = cut)
+```
+
+
+Another handy function for summarizing your data is `summarize(). For example, if you wanted to know what the mean for `carat` was in this data set, you could run the code in the chunk below:
+`
+
+
+```{r}
+summarize(diamonds, mean_carat = mean(carat))
+```
+
+
+
+###D. Visualizing data
+
+
+To build a visualization with `ggplot2` you layer plot elements together with a `+` symbol. You will learn a lot more about using `ggplot2` later in the course, but here is a preview of how easy and flexible it is to make visuals using code:
+
+
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point()
+```
+
+`ggplot2` makes it easy to modify or improve your visuals. For example, if you wanted to change the color of each point so that it represented another variable, such as the cut of the diamond, you can change the code like this:
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price, color = cut)) +
+  geom_point()
+```
+
+
+
+Wow, that's a busy visual! Sometimes when you are trying to represent many different aspects of your data in a visual, it can help to separate out some of the components. For example, you could create a different plot for each type of cut. `ggplot2` makes it easy to do this with the `facet_wrap()` function:
+
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  facet_wrap(~cut)
+```
+
+##VI Packages
+
+
+Check out its installed packages:
+
+```{r}
+installed.packages()
+```
+
+
+CRAN is source documentation for R packages.
+
+ Bioconductor
+, R-Forge
+, rOpenSci
+, or GitHub are other possible repository source
+
+[create its own package]https://kbroman.org/pkg_primer/
+
+
+Update 'tydiverse':
+
+```{r}
+tydiverse_update()
+```
+Update all packages
+
+```{r}
+update.packages()
+```
+
+Update a specific package
+
+```{r}
+install.packages("package name")
+```
+
+
+To get more informations on a package:
+
+```{r}
+browseVignettes('ggplot2') 
+```
+
+
+
+##VII tidyverse
+
+
+
+tydiverse is a package of 8 core packages:
+
+
+.ggplot2 for data visualization
+
+.tidyr for data cleanig
+
+.readr for importation
+
+.dplyr for data manipulation
+
+.tibble to work with data frames
+
+.purrr to write with fonctions and vectors with more readability
+
+.stringr to work with strings
+
+.forcats to solve common problems with factors
+
+
+
+## VIII dplyr
+
+Pipe is an R operator for expressing a sequence of multiple operations, represented with '%>%'
+
+
+To download an already installed data set in R we use
+'data()' as follow
+
+```{r}
+data('ToothGrowth')
+```
+
+
+```{r}
+View(ToothGrowth)
+```
+
+
+filter allows to generate a new data frame from an original one one the basis of a specified criteria.
+
+Here only rows for which the variable dose is equal 
+to 0.5 are selected.
+
+```{r}
+filtered_tg = filter(ToothGrowth, dose == 0.5)
+View(filtered_tg)
+```
+
+
+Now the arrange function will arrange the new data set in ascending len variable order
+
+```{r}
+arrange(filtered_tg, len)
+```
+
+
+This can be performed in one row thanks to a nested function
+
+```{r}
+arrange(filter(ToothGrowth, dose == 0.5), len)
+```
+
+
+Now let's use pipe to perform the same action
+Pipe operator can be called by ctrl + shift + m shortcut
+
+
+This is the cleanest way to code 
+(always check if code has been well indented otherwise it might not work)
+```{r}
+filtered_ToothGrowth <- ToothGrowth %>% 
+  filter(dose ==0.5) %>% 
+  arrange(len)
+
+View(filtered_ToothGrowth )
+```
+
+
+Here the code will filter then group by supp variable
+then create a data frame showing the mean of len variable by group.
+
+in the summarize function na.rm = T means that missing values will be removed 
+and .group "drop" means that the group structure will be removed.
+
+```{r}
+filtered_toothgrowth <- ToothGrowth %>% 
+  filter(dose == 0.5) %>% 
+  group_by(supp) %>% 
+  summarize(mean_len = mean(len, na.rm = T, .group = "drop"))
+
+View(filtered_toothgrowth)
+```
+
+
+```{r}
+View(ToothGrowth)
+```
+
+
+#Module 3
+
+##I R data frames
+
+
+###A. Tibbles
+
+Tibbles are streamlined data frames:
+
+.Never change data type of the inputs
+
+.Never change the names of your variables
+
+.Never create row names
+
+.Make printing easier
+
+The tibble package is part of the tidyverse package
+
+
+```{r}
+data(diamonds)
+View(diamonds)
+```
+
+
+Tibbles allow to have a better view of a data frame
+
+```{r}
+as_tibble(diamonds)
+```
+
+['more information on tibbles'](https://rstudio-education.github.io/tidyverse-cookbook/tidy.html#)
+
+
+##B. Working with data frames 
+
+```{r}
+library(ggplot2)
+data(diamonds)
+View(diamonds)
+```
+
+
+get a 6 x 10 preview
+```{r}
+head(diamonds)
+```
+
+
+structure of df
+
+```{r}
+str(diamonds)
+```
+
+```{r}
+glimpse(diamonds)
+```
+
+
+
+Only colnames
+
+```{r}
+colnames(diamonds)
+```
+
+Add a new column to a new df thanks to mutate function.
+
+Here we create a new column carat_2 which is a product of carat column by 100
+
+```{r}
+library(dplyr)
+
+diamonds2 = mutate(diamonds, carat_2 = carat * 100)
+
+head(diamonds)
+
+```
+
+###C.Create a data frame
+
+```{r}
+Names <- c('Charles Darwin', 'Albert Einstein', 'Marie Curie', 'Alan Turing')
+```
+
+```{r}
+library(lubridate)
+Birth = mdy(c('February 12th, 1809', 'March 14th, 1879', 
+          'November 7th, 1867', 'June 23rd, 1912'))
+```
+
+
+```{r}
+Death <- mdy(c('April 19, 1882', 'April 18, 1955', 
+           'July 4th, 1934', 'June 7, 1954'))
+```
+
+
+```{r}
+Great_Minds = data_frame(Names, Birth, Death)
+View(Great_Minds)
+```
+
+
+```{r}
+library(dplyr)
+Great_Minds %>% 
+  group_by(Names) %>% 
+  summarize(age = interval(Birth, Death) %/% years(1))
+```
+
+
+```{r}
+Great_Minds2 = Great_Minds %>% 
+  mutate(
+    Lifespan = interval(Birth, Death) %/% years(1),
+    Chronological_Age = interval(Birth, now()) %/% years(1),
+    Time_Since_Death = interval(Death, now()) %/% years(1), 
+    Chronological_Age_in_20y = interval(Birth, now() + dyears(20)) %/% years(1) 
+    )
+
+View(Great_Minds2)
+```
+
+
+
+##II Data-import basics
+
+###A Ready mades
+
+Available data sets can be display this way
+```{r}
+data()
+```
+
+to download a particular one
+```{r}
+data(mtcars)
+```
+
+Once downloaded a glimpse of it is available in RStudio environment.
+
+A View of it is also directly accessible by clicking on the tiny dataframe icone in the environment pane
+
+
+A preview can also be displayed in the consol by taping mtcars in it.
+
+
+###B. readr package
+
+
+The readr package in R is a great tool for reading rectangular data.
+Here are some examples of file types that store rectangular data:
+
+    .csv (comma separated values): a .csv file is a plain text file that contains a list of data. They mostly use commas to separate (or delimit) data, but sometimes they use other characters, like semicolons. 
+
+    .tsv (tab separated values): a .tsv file stores a data table in which the columns of data are separated by tabs. For example, a database table or spreadsheet data. 
+
+    .fwf (fixed width files): a .fwf file has a specific format that allows for the saving of textual data in an organized fashion. 
+
+    .log: a .log file is a computer-generated file that records events from operating systems and other software programs.
+
+readr functions
+
+The goal of readr is to provide a fast and friendly way to read rectangular data. readr supports several read_ functions. Each function refers to a specific file format.
+
+    read_csv(): comma-separated values (.csv) files
+
+    read_tsv(): tab-separated values files
+
+    read_delim(): general delimited files
+
+    read_fwf(): fixed-width files
+
+    read_table(): tabular files where columns are separated by white-space
+
+    read_log(): web log files
+    
+    
+To use one of those, you must enter the path of the
+wanted file between the parenthesis of the function
+depending on working directory eg:
+
+
+```{r}
+read.csv("relative_path_the_file.ext")
+```
+
+###C. readxl package 
+
+To read an xlsx file read_excel is the wright package
+
+```{r}
+library(readxl)
+read_excel("relative_path_to_the_file.xlsx")
+```
+
+It's also possible to specifie the sheets we want to 
+import by its name or index, if not the default imported sheet will be the first one of index 1.
+
+```{r}
+read_excel("relative_path_to_the_file.xlsx", sheet = "sheet_name")
+```
+
+
+
+To list the names of the individual sheets
+
+```{r}
+excel_sheets("relative_path_to_the_file.xlsx")
+```
+
+
+['cheatsheet'](https://raw.githubusercontent.com/rstudio/cheatsheets/main/data-import.pdf)
+
+
+
+###D. let's practice
+
+```{r}
+library(readr)
+getwd()
+```
+
+```{r}
+bookings = read.csv("hotel_bookings.csv")
+```
+
+```{r}
+head(bookings)
+str(bookings)
+colnames(bookings)
+```
+
+If you want to create another data frame using `bookings_df` that focuses on the average daily rate, which is referred to as `adr` in the data frame, and  `adults`, you can use the following code chunk to do that:
+
+
+```{r}
+library(dplyr)
+new_df <- select(bookings, adr, adults)
+```
+
+
+To create new variables in your data frame, you can use the `mutate()` function. This will make changes to the data frame, but not to the original data set you imported. That source data will remain unchanged. 
+
+```{r}
+mutate(new_df, total = `adr` / adults)
+```
+
+###III Cleaning Up
+
+
+install.packages(c('here', 'skimr', 'janitor'))
+
+```{r}
+library('here')
+library('skimr')
+library('janitor')
+library('dplyr')
+```
+Let's download palmerpenguins dataset to practice
+
+```{r}
+install.packages('palmerpenguins')
+library(palmerpenguins)
+View(penguins)
+```
+
+Summarizing data with skim package
+
+```{r}
+skim_without_charts(penguins)
+head(penguins)
+glimpse(penguins)
+```
+Using select from dplyr to select all columns but 'species', then rename island column in island_new
+
+```{r}
+penguins %>%  
+  select(-species) %>% 
+  rename(island_new = island)
+```
+
+
+We also can format all of our column names:
+
+
+```{r}
+rename_with(penguins, toupper)  #to format our columns names in upper cases
+rename_with(penguins, tolower)  #to format our columns names in lower cases
+```
+
+
+The 'clean_names()' function from the janitor package ensures
+that each column names are unique and consistent
+(also that there is only characters, numbers and underscores in our column names)
+
+lets see in prqctice.  p dqtq frq;e sees its 'sex' column renamed'$ex'.
+The 'clean_names()' function will then rewrite the column name 'ex
+
+```{r}
+p =penguins %>% 
+  rename('$ex' = sex)
+```
+
+
+```{r}
+colnames(p)
+clean_names(p)
+```
+
+###IV Operators
+
+'%%' Modulus
+Modulus (returns the remainder after division)
+```{r}
+5.3%%2
+```
+
+
+'%/%' Integer division
+Integer division (returns an integer value after division) 
+
+```{r}
+5.3%/%2
+```
+
+'^' exponent
+
+```{r}
+2^3
+```
+
+
+& is used for element-wise logical AND operations on vectors, matrices, or arrays, while && is used for short-circuiting logical AND operations on individual logical values.
+
+Same for | and ||
+
+
+###V Organize your data
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+
+sorting rows in ascending order by bill_length_mm
+
+```{r}
+penguins %>% 
+  arrange(bill_length_mm)
+```
+
+
+Descending order
+
+
+```{r}
+penguins %>% 
+  arrange(bill_length_mm)
+```
+
+
+
+Bill length mean, note that we've drop rows with missing values, sometimes it is not the required method.
+
+
+```{r}
+penguins %>% 
+  group_by(island) %>% 
+  drop_na() %>% 
+  summarize(bill_length_mean_per_island = mean(bill_length_mm)) 
+```
+
+Max
+
+```{r}
+penguins %>% 
+  group_by(island) %>% 
+  drop_na() %>% 
+  summarize(bill_length_mean_per_island = max(bill_length_mm)) 
+```
+
+
+group by island & specie summurize max and mean
+
+
+```{r}
+penguins %>% 
+  group_by(island, species) %>% 
+  drop_na() %>% 
+  summarize(bill_length_mean_per_island = max(bill_length_mm), mean(bill_length_mm)) 
+```
+
+
+Filtering 
+
+```{r}
+penguins %>% 
+  filter(species == 'Adelie') 
+  
+```
+
+
+Calculate the total number of canceled bookings and the average lead time for booking - you'll want to start your code after the %>% symbol. Make a column called 'number_canceled' to represent the total number of canceled bookings. Then, make a column called 'average_lead_time' to represent the average lead time. Use the `summarize()` function to do this in the code chunk below:
+
+
+```{r}
+bookings = read.csv("hotel_bookings.csv")
+ 
+bookings %>% 
+  summarize(number_canceled = sum(is_canceled), average_lead_time = mean(lead_time)) 
+  
+
+
+```
+
+###VI Transform Data
+
+
+you can combine the arrival month and year into one column using the unite() function:
+
+
+```{r}
+colnames(bookings)
+```
+
+
+```{r}
+bookings %>% 
+  select(arrival_date_month, arrival_date_year) %>% 
+  unite(arrival_month_and_year, c(arrival_date_month, arrival_date_year), sep = " ")
+```
+
+
+
+```{r}
+Names <- c('Charles Darwin', 'Albert Einstein', 'Marie Curie', 'Alan Turing')
+```
+
+```{r}
+library(lubridate)
+Birth = mdy(c('February 12th, 1809', 'March 14th, 1879', 
+          'November 7th, 1867', 'June 23rd, 1912'))
+```
+
+
+```{r}
+Death <- mdy(c('April 19, 1882', 'April 18, 1955', 
+           'July 4th, 1934', 'June 7, 1954'))
+```
+
+
+```{r}
+Great_Minds = data_frame(Names, Birth, Death)
+View(Great_Minds)
+```
+
+
+```{r}
+separate(Great_Minds, Names,into = c('First_name', 'Family_Name'), sep = ' ')
+```
+
+
+##VII Wide to long with tidyr
+
+screenshot of a spreadsheet in wide format. there are 7 rows shown and 8 columns
+
+Wide data has observations across several columns. Each column contains data from a different condition of the variable. In this example the columns are different years. 
+
+
+long data has all the observations in a single column, and the variable conditions are placed into separate rows. 
+
+'pivot_longer()' & 'pivot_wider()' are tidyr functions designed for table transposition.
+
+check out resources on pivoting in R to fully grasp those functions!
+
+
+###VIII Same data, different outcome
+
+
+install.packages('Tmisc')
+
+```{r}
+library(Tmisc)
+data(quartet)
+View(quartet)
+```
+
+
+When summarizing our data we might think that our 
+variables are identical in the four sets
+
+```{r}
+quartet %>% 
+  group_by(set) %>% 
+  summarize(mean(x), sd(x), mean(y), sd(y), cor(x, y))
+```
+
+
+However when ploting them we figure out that they aren't at all
+
+```{r}
+ggplot(quartet, aes(x, y)) + 
+  geom_point() + 
+  geom_smooth(method = lm, se = FALSE) +
+  facet_wrap(~set)
+  
+```
+
+
+install.packages('datasauRus')
+
+
+```{r}
+library(tidyverse)
+library(datasauRus)
+ggplot(datasaurus_dozen, aes(x = x, y = y, colour = dataset)) + geom_point() + theme_void() + theme(legend.position = "none") + facet_wrap(~dataset, ncol = 3)
+```
+
+
+##VIII The Bias function
+
+
+install.packages('SimDesign')
+
+We can quantify a model's bias by comparing the actual outcome of our data with the predicted outcome.
+
+Basically the bias function finds the average amount that the actual outcome is greater than the predicted outcome.
+
+["Mathematical explaination"](https://en.wikipedia.org/wiki/Bias_of_an_estimator)
+
+```{r}
+library(SimDesign)
+actual_temp = c(68.3, 70, 72.4, 71, 67, 70)
+predicted_temp =c(67.9, 69, 71.5, 70, 67, 69)
+
+bias(actual_temp, predicted_temp)
+```
+
+A result of 0.7166667 means that predicted values are slightly lower than actual values
+
+
+
+```{r}
+actual_sales = c(150, 203, 137, 247, 116, 287)
+predicted_sales = c(200, 300, 150, 250, 150, 300)
+bias(actual_sales, predicted_sales)
+```
+
+
+Meaning that predicted b=values are highly higher than actual values
+
+
+
+['More documentation on the function'](https://www.rdocumentation.org/packages/SimDesign/versions/2.2/topics/bias)
+
+['Going further with data sciences ethics'](https://datasciencebox.org/02-ethics.html)
+
+
+##IX Practice
+
+
+```{r load packages}
+library(tidyverse)
+library(skimr)
+library(janitor)
+```
+
+
+
+```{r load dataset}
+bookings <- read_csv("hotel_bookings.csv")
+```
+
+1. How many columns are in this dataset?
+A: 45
+B: 100
+C: 32 V
+D: 60
+
+
+```{r}
+glimpse(bookings)
+```
+
+
+2. The 'arrival_date_month' variable is chr or character type data.  
+A: True V
+B: False
+
+
+```{r}
+bookings['arrival_date_month']
+```
+
+
+Let's say you want to arrange the data by most lead time to least lead time because you want to focus on bookings that were made far in advance. You decide you want to try using the `arrange()` function
+
+## Practice Quiz
+What is the highest lead time for a hotel booking in this dataset?
+A: 737 V
+B: 709
+C: 629
+D: 0
+
+
+```{r arrange function}
+arrange(bookings, -lead_time)
+```
+
+
+
+You can also find out the maximum and minimum lead times without sorting the whole dataset using the `arrange()` function. Try it out using the max() and min() functions below:
+
+```{r}
+max(bookings$lead_time)
+```
+
+```{r}
+min(bookings$lead_time)
+```
+
+
+## Practice Quiz 
+What is the average lead time?
+A: 100.0011
+B: 45.0283
+C: 14.0221
+D: 104.0114  V
+
+```{r mean part two}
+mean(bookings$lead_time)
+```
+
+
+You were able to report to your boss what the average lead time before booking is, but now they want to know what the average lead time before booking is for just city hotels. They want to focus the promotion they're running by targeting major cities. 
+
+You know that your first step will be creating a new dataset that only contains data about city hotels. You can do that using the `filter()` function, and name your new data frame 'hotel_bookings_city':
+
+```{r filter}
+bookings_city <- 
+  filter(hotel_bookings,hotel=="City Hotel")
+bookings_city
+```
+
+Now, your boss wants to know a lot more information about city hotels, including the maximum and minimum lead time. They are also interested in how they are different from resort hotels. You don't want to run each line of code over and over again, so you decide to use the `group_by()`and`summarize()` functions. You can also use the pipe operator to make your code easier to follow. You will store the new dataset in a data frame named 'hotel_summary':
+
+
+```{r}
+hotel_summary = bookings %>% 
+  group_by(hotel) %>% 
+  summarize(mean_lead_time = mean(lead_time),
+            max_lead_time = max(lead_time),
+            min_lead_time = min(lead_time))
+
+hotel_summary
+```
+
+```{r}
+library(palmerpenguins)
+colnames(penguins)
+head(penguins)
+
+penguins %>% 
+  drop_na() %>% 
+  group_by(species) %>% 
+  summarize(min(bill_length_mm))
+
+```
+
+
+
+
+#Module 4
+
+##Vizualisation in R
+
+[ggplot2 cheat sheet](https://ggplot2.tidyverse.org/)
+
+
+In ggplot2:
+.An Aesthetic is a visual property of an object in your plot
+    .Mapping is matching up a specific variable in your data set with a specific    aesthetic
+
+.A Geom refers to the geometric object used to represent your data
+eg:
+    .points show the relation between 2 quantitative variables
+    .Bars show one quantitative variable varies across different categories
+  
+.Facets let you display smaller groups, or subsets, of your data
+
+.Label and annotations let you customize your plot
+
+###A. Hands-on activity
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+
+View(penguins)
+```
+
+
+Suppose you want to plot the relationship between body mass and flipper length in the three penguin species. You can choose a specific geom that fits the type of data you have. Points show the relationship between two quantitative variables. A scatterplot of points would be an effective way to display the relationship between the two variables. You can put flipper length on the x-axis and body mass on the y-axis. 
+
+Type the following code to create the plot. But before you run it, review the code piece by piece: 
+
+```{r}
+ggplot(data = penguins) + 
+  geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g)) 
+  
+```
+
+Same result
+
+```{r}
+ggplot(data = penguins, mapping = aes(x = flipper_length_mm, y = body_mass_g)) +  geom_point()
+```
+
+
+
+###B. Let's practice
+
+####1
+
+```{r}
+library(ggplot2)
+bookings = read_csv("hotel_bookings.csv")
+bookings
+```
+
+
+A stakeholder tells you, "I want to target people who book early, and I have a hypothesis that people with children have to book in advance."
+
+When you start to explore the data, it doesn't show what you would expect. That is why you decide to create a visualization to see how true that statement is-- or isn't.
+
+You can use `ggplot2` to do this. Try running the code below:
+
+
+```{r}
+colnames(bookings)
+bookings %>% 
+  group_by(children) %>% 
+  drop_na() %>% 
+  summarize(mean(lead_time))
+```
+
+
+class(bookings$children)
+class(bookings$lead_time)
+
+```{r}
+bookings %>% 
+  drop_na() %>% 
+  summarize(cor(children,lead_time))
+```
+
+We can indeed observe a slightly negative correlation between the both variables 
+which goes against the stakeholder intuition
+
+Let's draw a plot to check this out
+
+
+```{r}
+ggplot(data = bookings) +
+  geom_point(mapping = aes(x = lead_time, y = children))
+```
+
+
+The plot reveals that your stakeholder's hypothesis is incorrect. You report back to your stakeholder that many of the advanced bookings are being made by people with 0 children. 
+
+
+####2
+
+Next, your stakeholder says that she wants to increase weekend bookings, an important source of revenue for the hotel. Your stakeholder wants to know what group of guests book the most weekend nights in order to target that group in a new marketing campaign. She suggests that guests without children book the most weekend nights. Is this true? 
+
+Try mapping 'stays_in_weekend_nights' on the x-axis and 'children' on the y-axis by filling out the remainder of the code below.
+
+
+```{r}
+colnames(bookings)
+ggplot(data = bookings) + 
+  geom_point(mapping = aes(x = stays_in_week_nights, y = children))
+```
+
+
+
+Stakeholder's assumption was true
+
+
+
+
+###C.Enhancing visualizations in R
+
+
+```{r}
+library(palmerpenguins)
+
+ggplot(data = penguins) +
+      geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g, color = species))
+```
+
+
+```{r}
+ggplot(data = penguins) +
+      geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g, shape = species))
+```
+
+```{r}
+ggplot(data = penguins) +
+      geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g, shape = species, color = species, size = species, alpha = species))
+#alpha is for transparency
+```
+
+Note than when the purpose is to change overall aestetics and not specified to a variable, the aestetic must be set outside the the plot as follow
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(mapping = aes(x = flipper_length_mm, y = body_mass_g), color = 'purple')
+```
+
+
+['Cheat sheet'](https://ggplot2.tidyverse.org/)
+
+
+###D. Doing more with ggplot
+
+
+```{r}
+library(palmerpenguins)
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species, linetype = species)) +
+  geom_smooth() + #smooth lines are Local linear regression aggregations
+  geom_jitter() #jitter makes it easier to read overlapping points by adding random error to values
+  
+```
+
+'geom_smooth(method="loess")' loess smoothing process is fitted for smoothing plots with less than 1000 points
+
+
+'geom_smooth(method="gam", formula = y ~s(x))' Gam method is fitted for larger data sets
+
+
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+         geom_point()+
+         geom_smooth(method = "gam", formula = y ~s(x))
+```
+
+
+Key takeaways
+
+Smoothing helps data professionals reveal trends. When scatterplots alone lack clarity, smoothing adds a trend line, making underlying patterns in the data easier to spot for casual observers. ggplot2 offers two smoothing methods: Loess is best for plots with fewer than 1,000 points, it creates a flexible, local smoother. Gam is ideal for larger datasets because it uses a more robust model for general trends. Smoothing enhances data communication, adding a visual cue to highlight trends so data visualizations become clearer and more impactful for audiences.
+
+
+
+
+Let's make a bar chart
+
+
+```{r}
+diamonds = data("diamonds")
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+```
+
+
+###D. Facets
+
+####1. 'facet_wrap(~variable)'
+
+```{r}
+library(palmerpenguins)
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+  geom_point(aes(color = species)) +
+  facet_wrap(~species)
+```
+
+
+
+```{r}
+diamonds = data("diamonds")
+
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = color, fill = cut)) + 
+  facet_wrap(~cut)
+```
+
+
+
+####2. 'facet_grid(x~y)'
+
+To facet with 2 variables
+
+```{r}
+ggplot(data = penguins) + 
+  geom_point(mapping = aes(x = flipper_length_mm, y =body_mass_g, color = species)) + facet_grid(sex~species)
+```
+
+
+
+```{r}
+ggplot(data = penguins) + 
+  geom_point(mapping = aes(x = flipper_length_mm, y =body_mass_g, color = species)) + facet_grid(~species)
+```
+
+
+
+
+
+###E. Lesson 3: Aesthetics and Visualizations
+
+Your stakeholder is interested in developing promotions based on different booking distributions, but first they need to know how many of the transactions are occurring for each different distribution type.
+
+```{r}
+bookings = read_csv('hotel_bookings.csv')
+library(ggplot2)
+head(bookings)
+ggplot(data = bookings) +
+  geom_bar(mapping = aes(x = distribution_channel))
+```
+
+
+
+Use the bar chart you created to answer this question: what distribution type has the most number of bookings? Note your answer for the practice quiz question in Coursera afterwards.
+
+A: TA/TO V
+B: Direct
+C: GDS
+D: Corporate
+
+
+After exploring your bar chart, your stakeholder has more questions. Now they want to know if the number of bookings for each distribution type is different depending on whether or not there was a deposit or what market segment they represent. 
+
+
+```{r}
+colnames(bookings)
+
+ggplot(data = bookings) +
+  geom_bar(mapping = aes(x = distribution_channel, fill = deposit_type))
+```
+
+
+
+```{r}
+ggplot(data = bookings) + 
+  geom_bar(mapping = aes(x = distribution_channel, fill = deposit_type))
+```
+
+
+
+After reviewing the new charts, your stakeholder asks you to create separate charts for each deposit type and market segment to help them understand the differences more clearly.
+
+You know that the `facet_` function can do this very quickly.
+
+Add 'deposit_type' after the '~' symbol in the code chunk below to create a different chart for each deposit type:
+
+
+```{r}
+ggplot(data = bookings, aes(x = distribution_channel)) +
+  geom_bar() +
+  facet_wrap(~deposit_type) 
+```
+
+
+This code chunk creates three bar charts for 'no_deposit', non_refund', and 'refundable' deposit types. You notice that it's hard to read the x-axis labels here, so you add one piece of code at the end that rotates the text to 45 degrees to make it easier to read. 
+
+```{r}
+ggplot(data = bookings) +
+  geom_bar(mapping = aes(x = distribution_channel)) +
+  facet_wrap(~deposit_type) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+
+
+
+Now, you could put all of this in one chart and explore the differences by deposit type and market segment.
+
+Run the code chunk below to find out; notice how the ~ character is being used before the variables that the chart is being split by: 
+```{r creating a plot}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = distribution_channel)) +
+  facet_wrap(~deposit_type~market_segment) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+
+These charts are probably overwhelming and too hard to read, but it can be useful if you are exploring your data through visualizations.  
+
+
+###F. Filters and plots:
+
+```{r}
+library(palmerpenguins)
+
+penguins %>% 
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point(alpha = 0.3, position = position_jitter(),color = 'blue') +
+  geom_smooth(method = 'loess', color = 'green') + 
+  stat_smooth(method = 'lm', color = 'cyan')
+```
+
+
+
+Now, your stakeholder wants to run a family-friendly promotion targeting key market segments. She wants to know which market segments generate the largest number of bookings, and where these bookings are made (city hotels or resort hotels). 
+
+First, you decide to create a bar chart showing each hotel type and market segment. You use different colors to represent each market segment: 
+
+
+```{r}
+bookings %>% 
+  ggplot(aes(x = hotel, fill = market_segment)) +
+  geom_bar()
+```
+
+
+After creating this bar chart, you realize that it's difficult to compare the size of the market segments at the top of the bars. You want your stakeholder to be able to clearly compare each segment.   
+
+You decide to use the facet_wrap() function to create a separate plot for each market segment. In the parentheses of the facet_wrap() function, add the variable 'market_segment' after the tilde symbol (~):
+
+
+```{r}
+ggplot(data = bookings, aes(x = hotel, fill = market_segment)) +
+  geom_bar() +
+  facet_wrap(~market_segment)
+```
+
+
+Your stakeholder asks if you can create a plot that shows the relationship between lead time and guests traveling with children for online bookings at city hotels. This will give her a better idea of the specific timing for the promotion. 
+
+You think about it, and realize you have all the tools you need to fulfill the request. You break it down into the following two steps: 1) filtering your data; 2) plotting your filtered data. 
+
+
+```{r}
+bookings$lead_time
+```
+
+```{r}
+unique(bookings$market_segment)
+```
+
+
+```{r}
+bookings_v2 =  bookings %>% 
+  filter(hotel == 'City Hotel' & market_segment == 'Online TA') 
+
+bookings_v2 %>% 
+  select(lead_time)
+```
+
+
+```{r}
+bookings_v2 %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = children, y = lead_time)) 
+```
+
+
+
+Based on your previous filter, this scatterplot shows data for online bookings for city hotels. The plot reveals that bookings with children tend to have a shorter lead time, and bookings with 3 children have a significantly shorter lead time (<200 days). So, promotions targeting families can be made closer to the valid booking dates.  
+
+
+
+###G. Annotation layer:
+
+
+```{r}
+plot = ggplot(data = penguins) + 
+  geom_point(mapping = aes(x=flipper_length_mm, y = body_mass_g, color = species)) +
+  labs(title = "Palmer Penguins: Body Mass vs. Flipper Length", subtitle = "Sample of Three Penguins Species", caption = "Data collected by Dr. Kristen Gorman") 
+
+plot +  
+  annotate("text", x = 220, y = 3500, label = "The Gentoos are the largest!", color = "purple", fontface = "bold", size = 3.5, angle = 45)
+```
+
+####H. Saving your vizualisation
+
+```{r}
+library(ggplot2)
+library(palmerpenguins)
+
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point()
+```
+
+Export functionality is available in the plot tab while runing code outside of a chunk in R studio.
+However a right click might be enough whereves it is runned
+
+
+'ggsave()' function will automatically save the last displayed plot in current directory.
+
+eg:
+ggsave("Three_Penguin_Species.png)
+
+['more informations'](https://ggplot2.tidyverse.org/reference/ggsave.html#saving-images-without-ggsave-)
+
+
+###H.Some pratice on annotations
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+bookings = read_csv(hotel_bookings.csv)
+```
+
+
+```{r}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = market_segment, fill = market_segment)) +
+  facet_wrap(~hotel) +
+  labs(title="market segment distribution per hotel type") +
+  theme(axis.text.x = element_text(angle = 30))
+```
+
+Lets date our data
+```{r}
+mindate <- min(hotel_bookings$arrival_date_year)
+maxdate <- max(hotel_bookings$arrival_date_year)
+```
+
+Now, you will add in a subtitle using `subtitle=` in the `labs()` function. Then, you can use the `paste0()` function to use your newly-created variables in your labels. This is really handy, because if the data gets updated and there is more recent data added, you don't have to change the code below because the variables are dynamic:
+
+
+```{r}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = market_segment)) +
+  facet_wrap(~hotel) +
+  theme(axis.text.x = element_text(angle = 45)) +
+  labs(title="Comparison of market segments by hotel type for hotel bookings",
+       subtitle=paste0("Data from: ", mindate, " to ", maxdate))
+```
+
+You realize that this chart is displaying the technical details a little too prominently. You don't want that to be the second thing people notice during the presentation. You decide to switch the `subtitle`  to a `caption` which will appear in the bottom right corner instead.
+
+
+```{r}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = market_segment)) +
+  facet_wrap(~hotel) +
+  theme(axis.text.x = element_text(angle = 45)) +
+  labs(title="Comparison of market segments by hotel type for hotel bookings",
+       caption=paste0("Data from: ", mindate, " to ", maxdate))
+```
+
+Lets change x and y labels
+
+```{r city bar chart with x and y axis}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = market_segment)) +
+  facet_wrap(~hotel) +
+  theme(axis.text.x = element_text(angle = 45)) +
+  labs(title="Comparison of market segments by hotel type for hotel bookings",
+       caption=paste0("Data from: ", mindate, " to ", maxdate),
+       x="Market Segment",
+       y="Number of Bookings")
+```
+
+```{r}
+ggsave('hotel_booking_chart.png')
+```
+
+
+
+## Practice quiz
+What are the default dimensions that `ggsave()` saves an image as? Note your answer and respond in the Coursera platform.
+
+A: 5x5
+B: 10x10
+C: 7x7 V
+D: 25x25
+
+
+
+If you wanted to make your chart bigger and more rectangular to fit the slide show presentation, you could specify the height and width of your .png in the `ggsave()` command. Edit the code chunk below to create a 16x8 .png image: 
+
+```{r save your plot}
+ggsave('hotel_booking_chart.png',
+       width= 16,
+       height=8)
+```
+
+
+
+
